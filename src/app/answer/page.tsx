@@ -1,23 +1,21 @@
 "use client";
 
-// import { useWebDeviceDetection } from "@/context/WindowWidthContext";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
-	// const isWebDevice = useWebDeviceDetection();
+export default function AnswerScreen() {
 	const router = useRouter();
 
 	return (
 		<body>
 			<p className="font-sans w-full px-4 py-10 text-black text-center text-base gap-4">
-				VoGuesser
+				Answer Screen
 			</p>
 			<div className="flex justify-center">
 				<button
-					onClick={() => router.push("/guess")}
+					onClick={() => router.push("/game-end")}
 					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 				>
-					Play
+					Next
 				</button>
 			</div>
 		</body>

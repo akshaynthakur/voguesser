@@ -22,7 +22,7 @@ export default function Home() {
 	// }, []);
 
 	const collectionImages = useMemo(() => {
-		if (gameplay) return gameplay.playBrands[0];
+		if (gameplay && gameplay.playBrands) return gameplay.playBrands[0];
 		return [":/"];
 	}, [gameplay]);
 
@@ -32,15 +32,20 @@ export default function Home() {
 				VoGuesser
 			</p>
 			<div className="flex justify-center">
-				<p>{collectionImages}</p>
-			</div>
-			<div className="flex justify-center">
-				<button
-					onClick={() => router.push("/guess")}
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-				>
-					Play
-				</button>
+				{gameplay?.loading ? (
+					<p>Loading...</p>
+				) : (
+					<div className="flex justify-center">
+						<p>{collectionImages}</p>
+						{gameplay?.collectionSlugs && <p>{gameplay?.collectionSlugs[0]}</p>}
+						<button
+							onClick={() => router.push("/guess")}
+							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+						>
+							Play
+						</button>
+					</div>
+				)}
 			</div>
 		</body>
 	);

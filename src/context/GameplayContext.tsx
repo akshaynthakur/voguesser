@@ -12,12 +12,13 @@ import React, {
 } from "react";
 
 interface GameplayContextProps {
-	numRounds: number;
-	score: number;
-	difficulty: number;
-	playBrands: string[][];
-	collectionSlugs: string[];
-	collectionImages: string[];
+	numRounds: number | undefined;
+	score: number | undefined;
+	difficulty: number | undefined;
+	playBrands: string[][] | undefined;
+	collectionSlugs: string[] | undefined;
+	collectionImages: string[] | undefined;
+	loading: boolean;
 }
 
 const GameplayContext = createContext<GameplayContextProps | undefined>(
@@ -27,12 +28,31 @@ const GameplayContext = createContext<GameplayContextProps | undefined>(
 export const useGameplay = () => useContext(GameplayContext);
 
 export function GameplayProvider({ children }: { children: React.ReactNode }) {
-	const [numRounds, setNumRounds] = useState<number>(3);
-	const [score, setScore] = useState<number>(0);
-	const [difficulty, setDifficulty] = useState<number>(1);
-	const [playBrands, setPlayBrands] = useState<string[][]>([[]]);
-	const [collectionSlugs, setCollectionSlugs] = useState<string[]>([]);
-	const [collectionImages, setCollectionImages] = useState<string[]>([]);
+	const [numRounds, setNumRounds] = useState<number | undefined>(3);
+	const [score, setScore] = useState<number | undefined>(1);
+	const [difficulty, setDifficulty] = useState<number | undefined>(0);
+	const [playBrands, setPlayBrands] = useState<string[][]>();
+	const [collectionSlugs, setCollectionSlugs] = useState<string[]>();
+	const [collectionImages, setCollectionImages] = useState<string[]>();
+	const [loading, setLoading] = useState<boolean>(true);
+
+	const getGameplay = () => {
+		const gameplay = localStorage.getItem("voguesser_gameplay");
+		if (gameplay) {
+			const parsed: GameplayContextProps = JSON.parse(gameplay);
+			setNumRounds(parsed.numRounds);
+			setScore(parsed.score);
+			setDifficulty(parsed.difficulty);
+			setPlayBrands(parsed.playBrands);
+			setCollectionSlugs(parsed.collectionSlugs);
+			setCollectionImages(parsed.collectionImages);
+			setLoading(false);
+		} else {
+			console.log("about to load brands");
+			loadBrands();
+			setLoading(false);
+		}
+	};
 
 	const loadBrands = () => {
 		const shuffled = brands.sort(() => 0.5 - Math.random());
@@ -40,10 +60,9 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	const loadCollectionSlugs = async () => {
-		if (playBrands[0].length == 0) {
+		if (!playBrands) {
 			return;
 		}
-		console.log(playBrands);
 		const brandSlugs = playBrands.map((entry) => entry[0]);
 		await Promise.all(
 			brandSlugs.map(async (brandSlug) => await fetchCollectionSlug(brandSlug))
@@ -51,14 +70,6 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 			.then((result) => setCollectionSlugs(result))
 			.catch((e) => console.log(e));
 	};
-
-	useEffect(() => {
-		loadBrands();
-	}, []);
-
-	useEffect(() => {
-		loadCollectionSlugs();
-	}, [playBrands]);
 
 	const providerValue: GameplayContextProps = useMemo(
 		() => ({
@@ -68,6 +79,7 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 			playBrands: playBrands,
 			collectionSlugs: collectionSlugs,
 			collectionImages: collectionImages,
+			loading: loading,
 		}),
 		[
 			numRounds,
@@ -76,8 +88,23 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 			playBrands,
 			collectionSlugs,
 			collectionImages,
+			loading,
 		]
 	);
+
+	useEffect(() => {
+		if (providerValue.playBrands) {
+			localStorage.setItem("voguesser_gameplay", JSON.stringify(providerValue));
+		}
+	}, [providerValue]);
+
+	useEffect(() => {
+		getGameplay();
+	}, []);
+
+	useEffect(() => {
+		loadCollectionSlugs();
+	}, [playBrands]);
 
 	return (
 		<GameplayContext.Provider value={providerValue}>

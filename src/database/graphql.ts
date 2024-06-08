@@ -1,4 +1,4 @@
-import { ImageResult } from "@/app/types/graphql";
+import { CollectionSlugResult, ImageResult } from "@/types/graphql";
 import { gql, GraphQLClient } from "graphql-request";
 
 const graphQLClient = new GraphQLClient("https://graphql.vogue.com/graphql", {
@@ -10,27 +10,75 @@ const graphQLClient = new GraphQLClient("https://graphql.vogue.com/graphql", {
 	},
 });
 
-export async function fetchImage(slug: string) {
+export async function fetchImage(collectionSlug: string) {
 	try {
 		const query =
 			gql`
-                { fashionShowV2 (slug: "` +
-			slug +
-			`") { galleries { collection { slidesV2 { edges { node { ... on CollectionSlide { photosTout { ... on Image { url }}}}}}}}}}`;
+                { 
+					fashionShowV2 (slug: "` +
+			collectionSlug +
+			`") { 
+						galleries { 
+							collection { 
+								slidesV2 { 
+									edges { 
+										node { 
+											... on CollectionSlide { 
+												photosTout { 
+													... on Image { 
+														url 
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}`;
 		const result: ImageResult = await graphQLClient.request(query);
-		const images = result["fashionShowV2"]["galleries"]["collection"][
-			"slidesV2"
-		]["edges"].map((entry) => entry["node"]["photosTout"]["url"]);
+		const images = result.fashionShowV2.galleries.collection.slidesV2.edges.map(
+			(entry) => entry.node.photosTout.url
+		);
 		const shuffled = images.sort(() => 0.5 - Math.random());
 		return shuffled[0];
-	} catch (e) {
-		throw new Error("Unable to fetch runway image.");
+	} catch (error) {
+		throw new Error(
+			`An error occurred when trying to fetch image: ${
+				error instanceof Error ? error.message : error
+			}`
+		);
 	}
 }
 
-export async function fetchCollectionSlugs(brandSlugs: string[]) {
+export async function fetchCollectionSlug(brandSlug: string) {
 	try {
-	} catch (e) {
-		throw new Error("Unable to fetch collection slugs.");
+		const query =
+			gql`
+			{
+				brand(slug: "` +
+			brandSlug +
+			`") {
+					fashionShows(first: 500) {
+						fashionShow {
+							slug
+						}
+					}
+				}
+			}
+		`;
+		const result: CollectionSlugResult = await graphQLClient.request(query);
+		const collectionSlugs = result.brand.fashionShows.fashionShow
+			.map((entry) => entry.slug)
+			.filter((slug) => !slug.includes("resort") && !slug.includes("pre-fall"));
+		const shuffled = collectionSlugs.sort(() => 0.5 - Math.random());
+		return shuffled[0];
+	} catch (error) {
+		throw new Error(
+			`An error occurred when trying to fetch collection slug: ${
+				error instanceof Error ? error.message : error
+			}`
+		);
 	}
 }

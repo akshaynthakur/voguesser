@@ -1,7 +1,7 @@
 "use client";
 
 import { brands } from "@/database/brands";
-import { fetchCollectionSlug } from "@/database/graphql";
+import { fetchCollectionSlug, fetchImage } from "@/database/graphql";
 import React, {
 	createContext,
 	useState,
@@ -10,7 +10,7 @@ import React, {
 	useMemo,
 } from "react";
 
-interface GameplayContextProps {
+interface GameSettingsContextProps {
 	numRounds: number | undefined;
 	difficulty: number | undefined;
 	playBrands: string[][] | undefined;
@@ -19,13 +19,17 @@ interface GameplayContextProps {
 	loading: boolean;
 }
 
-const GameplayContext = createContext<GameplayContextProps | undefined>(
+const GameSettingsContext = createContext<GameSettingsContextProps | undefined>(
 	undefined
 );
 
-export const useGameplay = () => useContext(GameplayContext);
+export const useGameSettings = () => useContext(GameSettingsContext);
 
-export function GameplayProvider({ children }: { children: React.ReactNode }) {
+export function GameSettingsProvider({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	const [numRounds, setNumRounds] = useState<number>();
 	const [difficulty, setDifficulty] = useState<number>();
 	const [playBrands, setPlayBrands] = useState<string[][]>();
@@ -34,14 +38,14 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState<boolean>(true);
 
 	useEffect(() => {
-		const gameplay = localStorage.getItem("voguesser_gameplay");
-		if (gameplay && JSON.parse(gameplay).numRounds) {
-			setNumRounds(JSON.parse(gameplay).numRounds);
+		const gameSettings = localStorage.getItem("voguesser_gamesettings");
+		if (gameSettings && JSON.parse(gameSettings).numRounds) {
+			setNumRounds(JSON.parse(gameSettings).numRounds);
 		} else {
 			setNumRounds(3);
 		}
-		if (gameplay && JSON.parse(gameplay).difficulty) {
-			setDifficulty(JSON.parse(gameplay).difficulty);
+		if (gameSettings && JSON.parse(gameSettings).difficulty) {
+			setDifficulty(JSON.parse(gameSettings).difficulty);
 		} else {
 			setDifficulty(1);
 		}
@@ -56,9 +60,9 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 		if (!numRounds) {
 			return;
 		}
-		const gameplay = localStorage.getItem("voguesser_gameplay");
-		if (gameplay && JSON.parse(gameplay).playBrands) {
-			setPlayBrands(JSON.parse(gameplay).playBrands);
+		const gameSettings = localStorage.getItem("voguesser_gamesettings");
+		if (gameSettings && JSON.parse(gameSettings).playBrands) {
+			setPlayBrands(JSON.parse(gameSettings).playBrands);
 		} else {
 			loadBrands();
 		}
@@ -77,18 +81,41 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	useEffect(() => {
-		const gameplay = localStorage.getItem("voguesser_gameplay");
-		if (gameplay && JSON.parse(gameplay).collectionSlugs) {
-			setCollectionSlugs(JSON.parse(gameplay).collectionSlugs);
+		const gameSettings = localStorage.getItem("voguesser_gamesettings");
+		if (gameSettings && JSON.parse(gameSettings).collectionSlugs) {
+			setCollectionSlugs(JSON.parse(gameSettings).collectionSlugs);
 			setLoading(false);
 		} else {
-			// } else if (gameplay) {
 			loadCollectionSlugs();
 			setLoading(false);
 		}
 	}, [playBrands]);
 
-	const providerValue: GameplayContextProps = useMemo(
+	const loadCollectionIamges = async () => {
+		if (!collectionSlugs) {
+			return;
+		}
+		await Promise.all(
+			collectionSlugs.map(
+				async (collectionSlug) => await fetchImage(collectionSlug)
+			)
+		)
+			.then((result) => setCollectionImages(result))
+			.catch((e) => console.log(e));
+	};
+
+	useEffect(() => {
+		const gameSettings = localStorage.getItem("voguesser_gamesettings");
+		if (gameSettings && JSON.parse(gameSettings).collectionImages) {
+			setCollectionImages(JSON.parse(gameSettings).collectionImages);
+		} else {
+			setLoading(true);
+			loadCollectionIamges();
+			setLoading(false);
+		}
+	}, [collectionSlugs]);
+
+	const providerValue: GameSettingsContextProps = useMemo(
 		() => ({
 			numRounds: numRounds,
 			difficulty: difficulty,
@@ -109,13 +136,16 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		if (playBrands) {
-			localStorage.setItem("voguesser_gameplay", JSON.stringify(providerValue));
+			localStorage.setItem(
+				"voguesser_gamesettings",
+				JSON.stringify(providerValue)
+			);
 		}
 	}, [providerValue]);
 
 	return (
-		<GameplayContext.Provider value={providerValue}>
+		<GameSettingsContext.Provider value={providerValue}>
 			{children}
-		</GameplayContext.Provider>
+		</GameSettingsContext.Provider>
 	);
 }

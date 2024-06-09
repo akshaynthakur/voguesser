@@ -71,7 +71,12 @@ export async function fetchCollectionSlug(brandSlug: string) {
 		const result: CollectionSlugResult = await graphQLClient.request(query);
 		const collectionSlugs = result.brand.fashionShows.fashionShow
 			.map((entry) => entry.slug)
-			.filter((slug) => !slug.includes("resort") && !slug.includes("pre-fall"));
+			.filter(
+				(slug) =>
+					!slug.includes("resort") &&
+					!slug.includes("pre-fall") &&
+					!slug.includes("bridal")
+			);
 		const shuffled = collectionSlugs.sort(() => 0.5 - Math.random());
 		return shuffled[0];
 	} catch (error) {

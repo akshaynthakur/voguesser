@@ -8,6 +8,7 @@ import React, {
 	useEffect,
 	useContext,
 	useMemo,
+	useCallback,
 } from "react";
 
 interface GameSettingsContextProps {
@@ -51,10 +52,10 @@ export function GameSettingsProvider({
 		}
 	}, []);
 
-	const loadBrands = () => {
+	const loadBrands = useCallback(() => {
 		const shuffled = brands.sort(() => 0.5 - Math.random());
 		setPlayBrands(shuffled.slice(0, numRounds));
-	};
+	}, [numRounds]);
 
 	useEffect(() => {
 		if (!numRounds) {
@@ -66,9 +67,9 @@ export function GameSettingsProvider({
 		} else {
 			loadBrands();
 		}
-	}, [numRounds]);
+	}, [loadBrands, numRounds]);
 
-	const loadCollectionSlugs = async () => {
+	const loadCollectionSlugs = useCallback(async () => {
 		if (!playBrands) {
 			return;
 		}
@@ -78,7 +79,7 @@ export function GameSettingsProvider({
 		)
 			.then((result) => setCollectionSlugs(result))
 			.catch((e) => console.log(e));
-	};
+	}, [playBrands]);
 
 	useEffect(() => {
 		const gameSettings = localStorage.getItem("voguesser_gamesettings");
@@ -89,9 +90,9 @@ export function GameSettingsProvider({
 			loadCollectionSlugs();
 			setLoading(false);
 		}
-	}, [playBrands]);
+	}, [loadCollectionSlugs, playBrands]);
 
-	const loadCollectionIamges = async () => {
+	const loadCollectionImages = useCallback(async () => {
 		if (!collectionSlugs) {
 			return;
 		}
@@ -102,7 +103,7 @@ export function GameSettingsProvider({
 		)
 			.then((result) => setCollectionImages(result))
 			.catch((e) => console.log(e));
-	};
+	}, [collectionSlugs]);
 
 	useEffect(() => {
 		const gameSettings = localStorage.getItem("voguesser_gamesettings");
@@ -110,10 +111,10 @@ export function GameSettingsProvider({
 			setCollectionImages(JSON.parse(gameSettings).collectionImages);
 		} else {
 			setLoading(true);
-			loadCollectionIamges();
+			loadCollectionImages();
 			setLoading(false);
 		}
-	}, [collectionSlugs]);
+	}, [loadCollectionImages, collectionSlugs]);
 
 	const providerValue: GameSettingsContextProps = useMemo(
 		() => ({
@@ -135,7 +136,7 @@ export function GameSettingsProvider({
 	);
 
 	useEffect(() => {
-		if (playBrands) {
+		if (providerValue.playBrands) {
 			localStorage.setItem(
 				"voguesser_gamesettings",
 				JSON.stringify(providerValue)

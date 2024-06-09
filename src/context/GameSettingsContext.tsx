@@ -8,12 +8,10 @@ import React, {
 	useEffect,
 	useContext,
 	useMemo,
-	useCallback,
 } from "react";
 
 interface GameplayContextProps {
 	numRounds: number | undefined;
-	score: number | undefined;
 	difficulty: number | undefined;
 	playBrands: string[][] | undefined;
 	collectionSlugs: string[] | undefined;
@@ -28,36 +26,43 @@ const GameplayContext = createContext<GameplayContextProps | undefined>(
 export const useGameplay = () => useContext(GameplayContext);
 
 export function GameplayProvider({ children }: { children: React.ReactNode }) {
-	const [numRounds, setNumRounds] = useState<number | undefined>(3);
-	const [score, setScore] = useState<number | undefined>(1);
-	const [difficulty, setDifficulty] = useState<number | undefined>(0);
+	const [numRounds, setNumRounds] = useState<number>();
+	const [difficulty, setDifficulty] = useState<number>();
 	const [playBrands, setPlayBrands] = useState<string[][]>();
 	const [collectionSlugs, setCollectionSlugs] = useState<string[]>();
 	const [collectionImages, setCollectionImages] = useState<string[]>();
 	const [loading, setLoading] = useState<boolean>(true);
 
-	const getGameplay = () => {
+	useEffect(() => {
 		const gameplay = localStorage.getItem("voguesser_gameplay");
-		if (gameplay) {
-			const parsed: GameplayContextProps = JSON.parse(gameplay);
-			setNumRounds(parsed.numRounds);
-			setScore(parsed.score);
-			setDifficulty(parsed.difficulty);
-			setPlayBrands(parsed.playBrands);
-			setCollectionSlugs(parsed.collectionSlugs);
-			setCollectionImages(parsed.collectionImages);
-			setLoading(false);
+		if (gameplay && JSON.parse(gameplay).numRounds) {
+			setNumRounds(JSON.parse(gameplay).numRounds);
 		} else {
-			console.log("about to load brands");
-			loadBrands();
-			setLoading(false);
+			setNumRounds(3);
 		}
-	};
+		if (gameplay && JSON.parse(gameplay).difficulty) {
+			setDifficulty(JSON.parse(gameplay).difficulty);
+		} else {
+			setDifficulty(1);
+		}
+	}, []);
 
 	const loadBrands = () => {
 		const shuffled = brands.sort(() => 0.5 - Math.random());
 		setPlayBrands(shuffled.slice(0, numRounds));
 	};
+
+	useEffect(() => {
+		if (!numRounds) {
+			return;
+		}
+		const gameplay = localStorage.getItem("voguesser_gameplay");
+		if (gameplay && JSON.parse(gameplay).playBrands) {
+			setPlayBrands(JSON.parse(gameplay).playBrands);
+		} else {
+			loadBrands();
+		}
+	}, [numRounds]);
 
 	const loadCollectionSlugs = async () => {
 		if (!playBrands) {
@@ -71,10 +76,21 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 			.catch((e) => console.log(e));
 	};
 
+	useEffect(() => {
+		const gameplay = localStorage.getItem("voguesser_gameplay");
+		if (gameplay && JSON.parse(gameplay).collectionSlugs) {
+			setCollectionSlugs(JSON.parse(gameplay).collectionSlugs);
+			setLoading(false);
+		} else {
+			// } else if (gameplay) {
+			loadCollectionSlugs();
+			setLoading(false);
+		}
+	}, [playBrands]);
+
 	const providerValue: GameplayContextProps = useMemo(
 		() => ({
 			numRounds: numRounds,
-			score: score,
 			difficulty: difficulty,
 			playBrands: playBrands,
 			collectionSlugs: collectionSlugs,
@@ -83,7 +99,6 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 		}),
 		[
 			numRounds,
-			score,
 			difficulty,
 			playBrands,
 			collectionSlugs,
@@ -93,18 +108,10 @@ export function GameplayProvider({ children }: { children: React.ReactNode }) {
 	);
 
 	useEffect(() => {
-		if (providerValue.playBrands) {
+		if (playBrands) {
 			localStorage.setItem("voguesser_gameplay", JSON.stringify(providerValue));
 		}
 	}, [providerValue]);
-
-	useEffect(() => {
-		getGameplay();
-	}, []);
-
-	useEffect(() => {
-		loadCollectionSlugs();
-	}, [playBrands]);
 
 	return (
 		<GameplayContext.Provider value={providerValue}>

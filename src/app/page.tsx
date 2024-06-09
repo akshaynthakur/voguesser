@@ -4,26 +4,21 @@
 import { useRouter } from "next/navigation";
 import { fetchCollectionSlug, fetchImage } from "@/database/graphql";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useGameplay } from "@/context/GameplayContext";
+import { useGameplay } from "@/context/GameSettingsContext";
 
 export default function Home() {
 	// const isWebDevice = useWebDeviceDetection();
 	const gameplay = useGameplay();
 	const router = useRouter();
-	// const [result, setResult] = useState<string>("");
 
-	// useEffect(() => {
-	// 	fetchCollectionSlug("prada")
-	// 		.then((result: string) => setResult(result))
-	// 		.catch((e) => console.log(e));
-	// 	// fetchImage("fall-2016-ready-to-wear/prada")
-	// 	// 	.then((result: string) => setResult(result))
-	// 	// 	.catch((e) => console.log("Error for fetch collection slug", e));
-	// }, []);
+	const playBrands = useMemo(() => {
+		if (gameplay?.playBrands) return gameplay.playBrands[0];
+		return ["no brands"];
+	}, [gameplay]);
 
-	const collectionImages = useMemo(() => {
-		if (gameplay && gameplay.playBrands) return gameplay.playBrands[0];
-		return [":/"];
+	const collectionSlugs = useMemo(() => {
+		if (gameplay?.collectionSlugs) return gameplay.collectionSlugs[0];
+		return ["no collections"];
 	}, [gameplay]);
 
 	return (
@@ -36,8 +31,8 @@ export default function Home() {
 					<p>Loading...</p>
 				) : (
 					<div className="flex justify-center">
-						<p>{collectionImages}</p>
-						{gameplay?.collectionSlugs && <p>{gameplay?.collectionSlugs[0]}</p>}
+						<p>{playBrands}</p>
+						<p>{collectionSlugs}</p>
 						<button
 							onClick={() => router.push("/guess")}
 							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"

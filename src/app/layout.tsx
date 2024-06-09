@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { GameplayProvider } from "@/context/GameplayContext";
+import { GameplayProvider } from "@/context/GameSettingsContext";
 
 const inter = Inter({ subsets: ["latin"] });
 

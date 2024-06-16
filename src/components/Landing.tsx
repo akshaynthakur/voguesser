@@ -1,6 +1,11 @@
 "use client";
 
+import { useGameState } from "@/context/GameStateContext";
+
 export const Landing = () => {
+	const gameState = useGameState();
+	if (!gameState) throw new Error("Game state must be defined");
+
 	return (
 		<section>
 			<div className="flex justify-center">
@@ -16,7 +21,9 @@ export const Landing = () => {
 							?
 						</button>
 						<button
-							onClick={() => {}}
+							onClick={() => {
+								gameState.setSegment("GUESS");
+							}}
 							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 						>
 							Play

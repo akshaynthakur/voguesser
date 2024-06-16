@@ -1,13 +1,28 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+	Dispatch,
+	SetStateAction,
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import { useGameSettings } from "./GameSettingsContext";
+import next from "next";
 
 interface GameStateContextProps {
 	segment: string | undefined;
 	score: number | undefined;
 	currentRound: number | undefined;
 	image: string | undefined;
+	setSegment: Dispatch<SetStateAction<string | undefined>>;
+	setScore: Dispatch<SetStateAction<number | undefined>>;
+	setCurrentRound: Dispatch<SetStateAction<number | undefined>>;
+	setImage: Dispatch<SetStateAction<string | undefined>>;
+	// nextRound: () => void;
 }
 
 const GameStateContext = createContext<GameStateContextProps | undefined>(
@@ -40,12 +55,23 @@ export function GameStateProvider({ children }: { children: React.ReactNode }) {
 		} else {
 			setCurrentRound(1);
 		}
+	}, [gameSettings]);
+
+	useEffect(() => {
+		const gameState = localStorage.getItem("voguesser_gamestate");
 		if (gameState && JSON.parse(gameState).image) {
 			setImage(JSON.parse(gameState).image);
-		} else if (gameSettings?.collectionImages && currentRound) {
-			setImage(gameSettings.collectionImages[currentRound - 1]);
+		} else if (gameSettings?.collectionImages) {
+			setImage(gameSettings.collectionImages[0]);
 		}
-	}, [currentRound, gameSettings]);
+	}, [gameSettings]);
+
+	// const nextRound = useCallback(() => {
+	// 	if (currentRound && gameSettings?.collectionImages) {
+	// 		setImage(gameSettings.collectionImages[currentRound]);
+	// 		setCurrentRound(currentRound + 1);
+	// 	}
+	// }, [currentRound, gameSettings]);
 
 	const providerValue: GameStateContextProps = useMemo(
 		() => ({
@@ -53,6 +79,11 @@ export function GameStateProvider({ children }: { children: React.ReactNode }) {
 			score: score,
 			currentRound: currentRound,
 			image: image,
+			setSegment: setSegment,
+			setScore: setScore,
+			setCurrentRound: setCurrentRound,
+			setImage: setImage,
+			// nextRound: nextRound,
 		}),
 		[segment, score, currentRound, image]
 	);

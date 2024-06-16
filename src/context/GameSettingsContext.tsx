@@ -9,6 +9,8 @@ import React, {
 	useContext,
 	useMemo,
 	useCallback,
+	Dispatch,
+	SetStateAction,
 } from "react";
 
 interface GameSettingsContextProps {
@@ -18,6 +20,12 @@ interface GameSettingsContextProps {
 	collectionSlugs: string[] | undefined;
 	collectionImages: string[] | undefined;
 	loading: boolean;
+	reset: boolean;
+	setReset: Dispatch<SetStateAction<boolean>>;
+	loadBrands: () => void;
+	setPlayBrands: Dispatch<SetStateAction<string[][] | undefined>>;
+	setCollectionSlugs: Dispatch<SetStateAction<string[] | undefined>>;
+	setCollectionImages: Dispatch<SetStateAction<string[] | undefined>>;
 }
 
 const GameSettingsContext = createContext<GameSettingsContextProps | undefined>(
@@ -37,6 +45,7 @@ export function GameSettingsProvider({
 	const [collectionSlugs, setCollectionSlugs] = useState<string[]>();
 	const [collectionImages, setCollectionImages] = useState<string[]>();
 	const [loading, setLoading] = useState<boolean>(true);
+	const [reset, setReset] = useState<boolean>(false);
 
 	useEffect(() => {
 		const gameSettings = localStorage.getItem("voguesser_gamesettings");
@@ -63,11 +72,12 @@ export function GameSettingsProvider({
 		}
 		const gameSettings = localStorage.getItem("voguesser_gamesettings");
 		if (gameSettings && JSON.parse(gameSettings).playBrands) {
+			console.log(JSON.parse(gameSettings).playBrands);
 			setPlayBrands(JSON.parse(gameSettings).playBrands);
 		} else {
 			loadBrands();
 		}
-	}, [loadBrands, numRounds]);
+	}, [loadBrands, numRounds, reset]);
 
 	const loadCollectionSlugs = useCallback(async () => {
 		if (!playBrands) {
@@ -124,6 +134,12 @@ export function GameSettingsProvider({
 			collectionSlugs: collectionSlugs,
 			collectionImages: collectionImages,
 			loading: loading,
+			reset: reset,
+			setReset: setReset,
+			loadBrands: loadBrands,
+			setPlayBrands: setPlayBrands,
+			setCollectionSlugs: setCollectionSlugs,
+			setCollectionImages: setCollectionImages,
 		}),
 		[
 			numRounds,
@@ -132,15 +148,22 @@ export function GameSettingsProvider({
 			collectionSlugs,
 			collectionImages,
 			loading,
+			reset,
+			setReset,
+			loadBrands,
+			setCollectionImages,
+			setCollectionSlugs,
+			setPlayBrands,
 		]
 	);
 
 	useEffect(() => {
-		if (providerValue.playBrands) {
+		if (providerValue.numRounds) {
 			localStorage.setItem(
 				"voguesser_gamesettings",
 				JSON.stringify(providerValue)
 			);
+			// console.log(providerValue);
 		}
 	}, [providerValue]);
 

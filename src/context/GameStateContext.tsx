@@ -4,14 +4,12 @@ import {
 	Dispatch,
 	SetStateAction,
 	createContext,
-	useCallback,
 	useContext,
 	useEffect,
 	useMemo,
 	useState,
 } from "react";
 import { useGameSettings } from "./GameSettingsContext";
-import next from "next";
 
 interface GameStateContextProps {
 	segment: string | undefined;
@@ -22,7 +20,7 @@ interface GameStateContextProps {
 	setScore: Dispatch<SetStateAction<number | undefined>>;
 	setCurrentRound: Dispatch<SetStateAction<number | undefined>>;
 	setImage: Dispatch<SetStateAction<string | undefined>>;
-	// nextRound: () => void;
+	// playAgain: () => void;
 }
 
 const GameStateContext = createContext<GameStateContextProps | undefined>(
@@ -66,12 +64,7 @@ export function GameStateProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [gameSettings]);
 
-	// const nextRound = useCallback(() => {
-	// 	if (currentRound && gameSettings?.collectionImages) {
-	// 		setImage(gameSettings.collectionImages[currentRound]);
-	// 		setCurrentRound(currentRound + 1);
-	// 	}
-	// }, [currentRound, gameSettings]);
+	const playAgain = () => {};
 
 	const providerValue: GameStateContextProps = useMemo(
 		() => ({
@@ -83,7 +76,7 @@ export function GameStateProvider({ children }: { children: React.ReactNode }) {
 			setScore: setScore,
 			setCurrentRound: setCurrentRound,
 			setImage: setImage,
-			// nextRound: nextRound,
+			// playAgain: playAgain,
 		}),
 		[segment, score, currentRound, image]
 	);

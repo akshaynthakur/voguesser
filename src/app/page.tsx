@@ -9,6 +9,7 @@ import Image from "next/image";
 import { Landing } from "@/components/Landing";
 import { useGameState } from "@/context/GameStateContext";
 import { Guess } from "@/components/Guess";
+import { GameEnd } from "@/components/GameEnd";
 
 export default function Home() {
 	// const isWebDevice = useWebDeviceDetection();
@@ -25,6 +26,7 @@ export default function Home() {
 			</p>
 			{gameState.segment === "LANDING" && <Landing />}
 			{gameState.segment === "GUESS" && <Guess />}
+			{gameState.segment === "GAME_END" && <GameEnd />}
 		</body>
 	);
 }

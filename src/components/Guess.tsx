@@ -63,7 +63,16 @@ export const Guess = () => {
 
 	return (
 		<section className="flex justify-center">
-			<Image width={200} height={300} alt={"runway image"} src={image}></Image>
+			{gameSettings.loading ? (
+				<p>Loading...</p>
+			) : (
+				<Image
+					width={200}
+					height={300}
+					alt={"runway image"}
+					src={image}
+				></Image>
+			)}
 			<div className="flex items-center justify-center bg-gray-100">
 				{reveal ? (
 					<div className="w-96">

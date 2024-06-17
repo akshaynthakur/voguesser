@@ -11,17 +11,14 @@ export const GameEnd = () => {
 	const gameState = useGameState();
 	if (!gameState) throw new Error("Game state must be defined");
 
-	async function sleep(ms: number): Promise<void> {
-		return new Promise((resolve) => setTimeout(resolve, ms));
-	}
-
 	const handlePlayAgain = async () => {
-		gameSettings.setPlayBrands(undefined);
-		gameSettings.setCollectionSlugs(undefined);
-		gameSettings.setCollectionImages(undefined);
-		await sleep(2000);
-		gameSettings.setReset(!gameSettings.reset);
-		// localStorage.removeItem("voguesser_gamesettings");
+		gameSettings.setLoading(true);
+		gameState.setSegment("GUESS");
+		gameState.setCurrentRound(1);
+		gameState.setScore(0);
+		gameSettings.loadNewGame().then(() => {
+			gameSettings.setLoading(false);
+		});
 	};
 
 	return (

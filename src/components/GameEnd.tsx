@@ -16,7 +16,7 @@ export const GameEnd = () => {
 		gameState.setSegment("GUESS");
 		gameState.setCurrentRound(1);
 		gameState.setScore(0);
-		gameSettings.loadNewGame().then(() => {
+		gameSettings.loadNewGame().finally(() => {
 			gameSettings.setLoading(false);
 		});
 	};

@@ -20,7 +20,6 @@ interface GameStateContextProps {
 	setScore: Dispatch<SetStateAction<number>>;
 	setCurrentRound: Dispatch<SetStateAction<number>>;
 	setImage: Dispatch<SetStateAction<string>>;
-	// playAgain: () => void;
 }
 
 const GameStateContext = createContext<GameStateContextProps | undefined>(

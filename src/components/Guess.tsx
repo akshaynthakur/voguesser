@@ -28,6 +28,13 @@ export const Guess = () => {
 		else "";
 	}, [gameSettings.collectionSlugs, gameState.currentRound]);
 
+	const brandName = useMemo(() => {
+		console.log(gameSettings.playBrands);
+		if (gameSettings.playBrands)
+			return gameSettings.playBrands[gameState.currentRound - 1][1];
+		else "";
+	}, [gameSettings.playBrands, gameState.currentRound]);
+
 	const [reveal, setReveal] = useState<boolean>(false);
 
 	const [inputs, setInputs] = useState<GuessInputs>({
@@ -44,6 +51,17 @@ export const Guess = () => {
 
 	const handleSubmit = (event: any) => {
 		event.preventDefault();
+		let newPoints = 0;
+		if (inputs.brandGuess == brandName) {
+			newPoints += 60;
+		}
+		if (inputs.seasonGuess == slug?.split("-")[0]) {
+			newPoints += 10;
+		}
+		if (inputs.yearGuess.toString() == slug?.split("-")[1]) {
+			newPoints += 30;
+		}
+		gameState.setScore(gameState.score + newPoints);
 		setReveal(true);
 	};
 
@@ -63,70 +81,75 @@ export const Guess = () => {
 
 	return (
 		<section className="flex justify-center">
-			{gameSettings.loading ? (
-				<p>Loading...</p>
-			) : (
-				<Image
-					width={200}
-					height={300}
-					alt={"runway image"}
-					src={image}
-				></Image>
-			)}
-			<div className="flex items-center justify-center bg-gray-100">
-				{reveal ? (
-					<div className="w-96">
-						<p>{slug?.split("/")[1]}</p>
-						<p>{slug?.split("-")[0]}</p>
-						<p>{slug?.split("-")[1]}</p>
-						<button
-							onClick={() => handleReveal()}
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-						>
-							Next Image
-						</button>
+			<div>
+				<p>Score: {gameState.score}</p>
+				<div className="flex justify-center">
+					{gameSettings.loading ? (
+						<p>Loading...</p>
+					) : (
+						<Image
+							width={200}
+							height={300}
+							alt={"runway image"}
+							src={image}
+						></Image>
+					)}
+					<div className="flex items-center justify-center bg-gray-100">
+						{reveal ? (
+							<div className="w-96">
+								<p>{brandName}</p>
+								<p>{slug?.split("-")[0]}</p>
+								<p>{slug?.split("-")[1]}</p>
+								<button
+									onClick={() => handleReveal()}
+									className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+								>
+									Next Image
+								</button>
+							</div>
+						) : (
+							<form
+								className="flex flex-col items-start bg-grey p-6 rounded shadow-lg w-96"
+								onSubmit={handleSubmit}
+							>
+								<label>
+									Brand:
+									<input
+										className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+										type="text"
+										name="brandGuess"
+										value={inputs.brandGuess}
+										onChange={handleChange}
+									/>
+								</label>
+								<label>
+									Season:
+									<input
+										className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+										type="text"
+										name="seasonGuess"
+										value={inputs.seasonGuess}
+										onChange={handleChange}
+									/>
+								</label>
+								<label>
+									Year:
+									<input
+										className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+										type="number"
+										name="yearGuess"
+										value={inputs.yearGuess}
+										onChange={handleChange}
+									/>
+								</label>
+								<input
+									className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+									type="submit"
+								/>
+							</form>
+						)}
 					</div>
-				) : (
-					<form
-						className="flex flex-col items-start bg-grey p-6 rounded shadow-lg w-96"
-						onSubmit={handleSubmit}
-					>
-						<label>
-							Brand:
-							<input
-								className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-								type="text"
-								name="brandGuess"
-								value={inputs.brandGuess}
-								onChange={handleChange}
-							/>
-						</label>
-						<label>
-							Season:
-							<input
-								className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-								type="text"
-								name="seasonGuess"
-								value={inputs.seasonGuess}
-								onChange={handleChange}
-							/>
-						</label>
-						<label>
-							Year:
-							<input
-								className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-								type="number"
-								name="yearGuess"
-								value={inputs.yearGuess}
-								onChange={handleChange}
-							/>
-						</label>
-						<input
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-							type="submit"
-						/>
-					</form>
-				)}
+				</div>
 			</div>
 		</section>
 	);

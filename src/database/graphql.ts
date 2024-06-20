@@ -75,6 +75,7 @@ export async function fetchCollectionSlug(brandSlug: string) {
 				(slug) =>
 					!slug.includes("resort") &&
 					!slug.includes("pre-fall") &&
+					!slug.includes("menswear") &&
 					!slug.includes("bridal")
 			);
 		const shuffled = collectionSlugs.sort(() => 0.5 - Math.random());

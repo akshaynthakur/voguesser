@@ -1,10 +1,10 @@
 "use client";
 
-import { useGameState } from "@/context/GameStateContext";
+import { useGameSettings } from "@/context/GameSettingsContext";
 
 export const Landing = () => {
-	const gameState = useGameState();
-	if (!gameState) throw new Error("Game state must be defined");
+	const gameSettings = useGameSettings();
+	if (!gameSettings) throw new Error("Game state must be defined");
 
 	return (
 		<section>
@@ -22,7 +22,7 @@ export const Landing = () => {
 						</button>
 						<button
 							onClick={() => {
-								gameState.setSegment("GUESS");
+								gameSettings.setSegment("GUESS");
 							}}
 							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 						>

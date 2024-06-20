@@ -20,7 +20,11 @@ interface GameSettingsContextProps {
 	collectionSlugs: string[];
 	collectionImages: string[];
 	loading: boolean;
+	segment: string;
+	score: number;
 	setLoading: Dispatch<SetStateAction<boolean>>;
+	setSegment: Dispatch<SetStateAction<string>>;
+	setScore: Dispatch<SetStateAction<number>>;
 	loadNewGame: () => Promise<void>;
 }
 
@@ -42,6 +46,9 @@ export function GameSettingsProvider({
 	const [collectionImages, setCollectionImages] = useState<string[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 
+	const [segment, setSegment] = useState<string>("LANDING");
+	const [score, setScore] = useState<number>(0);
+
 	const loadNewGame = useCallback(async () => {
 		const shuffled = brands.sort(() => 0.5 - Math.random());
 		const brandNames = shuffled.slice(0, numRounds);
@@ -52,6 +59,7 @@ export function GameSettingsProvider({
 			brandSlugs.map(async (brandSlug) => await fetchCollectionSlug(brandSlug))
 		)
 			.then(async (result) => {
+				console.log(result);
 				setCollectionSlugs(result);
 				await Promise.all(
 					result.map(async (collectionSlug) => await fetchImage(collectionSlug))
@@ -59,15 +67,18 @@ export function GameSettingsProvider({
 					.then((result) => setCollectionImages(result))
 					.catch((e) => console.log(e));
 			})
-			.catch((e) => console.log(e))
-			.finally(() => {
-				setLoading(false);
-			});
+			.catch((e) => console.log(e));
 	}, [numRounds]);
 
 	useEffect(() => {
 		loadNewGame();
 	}, [loadNewGame]);
+
+	useEffect(() => {
+		if (collectionImages.length !== 0) {
+			setLoading(false);
+		}
+	}, [collectionImages]);
 
 	const providerValue: GameSettingsContextProps = useMemo(
 		() => ({
@@ -77,7 +88,11 @@ export function GameSettingsProvider({
 			collectionSlugs: collectionSlugs,
 			collectionImages: collectionImages,
 			loading: loading,
+			segment: segment,
+			score: score,
 			setLoading: setLoading,
+			setSegment: setSegment,
+			setScore: setScore,
 			loadNewGame: loadNewGame,
 		}),
 		[
@@ -87,7 +102,8 @@ export function GameSettingsProvider({
 			collectionSlugs,
 			collectionImages,
 			loading,
-			setLoading,
+			segment,
+			score,
 			loadNewGame,
 		]
 	);

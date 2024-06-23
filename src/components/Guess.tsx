@@ -136,7 +136,7 @@ export const Guess = () => {
 							/>
 							{/* )} */}
 						</div>
-						<div className="flex items-center justify-center bg-gray-100">
+						<div className="w-full max-w-[80vw] min-w-[20vw] mx-auto flex justify-center space-x-4">
 							{reveal ? (
 								<div>
 									<p>{brandName}</p>
@@ -151,33 +151,33 @@ export const Guess = () => {
 								</div>
 							) : (
 								<form
-									className="flex flex-col items-start bg-grey p-6 rounded shadow-lg"
+									className="flex flex-col items-start bg-grey rounded shadow-lg"
 									onSubmit={handleSubmit}
 								>
-									<label>
+									<label className="text-[2.5vw]">
 										Brand:
 										<input
-											className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											className="text-[2.5vw] border border-gray-300 w-[40vw] p-[2vw] m-[0.5em] rounded focus:outline-none focus:ring-[0.25vw] focus:ring-blue-500 focus:border-transparent"
 											type="text"
 											name="brandGuess"
 											value={inputs.brandGuess}
 											onChange={handleChange}
 										/>
 									</label>
-									<label>
+									<label className="text-[2.5vw]">
 										Season:
 										<input
-											className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											className="text-[2.5vw] border border-gray-300 w-[40vw] p-[2vw] m-[0.5em] rounded focus:outline-none focus:ring-[0.25vw] focus:ring-blue-500 focus:border-transparent"
 											type="text"
 											name="seasonGuess"
 											value={inputs.seasonGuess}
 											onChange={handleChange}
 										/>
 									</label>
-									<label>
+									<label className="text-[2.5vw]">
 										Year:
 										<input
-											className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											className="text-[2.5vw] border border-gray-300 w-[40vw] p-[2vw] m-[0.5em] rounded focus:outline-none focus:ring-[0.25vw] focus:ring-blue-500 focus:border-transparent"
 											type="number"
 											name="yearGuess"
 											value={inputs.yearGuess}

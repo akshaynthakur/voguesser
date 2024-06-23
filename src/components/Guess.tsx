@@ -1,8 +1,8 @@
 "use client";
 
 import { useGameSettings } from "@/context/GameSettingsContext";
+import { truncateSync } from "fs";
 import Image from "next/image";
-import { relative } from "path";
 import { useEffect, useMemo, useState } from "react";
 
 interface GuessInputs {
@@ -17,7 +17,6 @@ export const Guess = () => {
 
 	const [currentRound, setCurrentRound] = useState<number>(1);
 	const [image, setImage] = useState<string>("");
-	// const [loading, setLoading] = useState<boolean>(true);
 	const [opacity, setOpacity] = useState(0);
 	const [reveal, setReveal] = useState<boolean>(false);
 	const [inputs, setInputs] = useState<GuessInputs>({
@@ -25,6 +24,28 @@ export const Guess = () => {
 		seasonGuess: "",
 		yearGuess: 0,
 	});
+
+	const initialTime = 60;
+	const [timeRemaining, setTimeRemaining] = useState(initialTime);
+	// const [timerRunning, setTimerRunning] = useState(true);
+
+	useEffect(() => {
+		setTimeRemaining(60);
+		const timerInterval = setInterval(() => {
+			setTimeRemaining((prevTime) => {
+				if (prevTime === 0) {
+					clearInterval(timerInterval);
+					console.log("Countdown complete!");
+					return 0;
+					// } else if (timerRunning) {
+					// 	return prevTime - 1;
+				} else {
+					return prevTime - 1;
+				}
+			});
+		}, 1000);
+		return () => clearInterval(timerInterval);
+	}, [opacity]);
 
 	const slug = useMemo(() => {
 		if (gameSettings.collectionSlugs)
@@ -45,6 +66,7 @@ export const Guess = () => {
 	};
 
 	const handleSubmit = (event: any) => {
+		const timeMultiplier = Math.min(timeRemaining + 5, 60) / 60;
 		event.preventDefault();
 		let newPoints = 0;
 		if (inputs.brandGuess == brandName) {
@@ -56,7 +78,11 @@ export const Guess = () => {
 		if (inputs.yearGuess.toString() == slug?.split("-")[1]) {
 			newPoints += 30;
 		}
-		gameSettings.setScore(gameSettings.score + newPoints);
+		gameSettings.setScore(
+			gameSettings.score + Math.round(newPoints * timeMultiplier)
+		);
+		console.log(newPoints);
+		console.log(timeMultiplier);
 		setReveal(true);
 	};
 
@@ -83,6 +109,7 @@ export const Guess = () => {
 			) : (
 				<div>
 					<p>Score: {gameSettings.score}</p>
+					{!reveal && <p>Seconds: {timeRemaining}</p>}
 					<div className="flex justify-center">
 						<div
 							style={{
@@ -92,9 +119,6 @@ export const Guess = () => {
 								overflow: "hidden",
 							}}
 						>
-							{/* {loading ? (
-								<p>Loading...</p>
-							) : ( */}
 							<Image
 								style={{ opacity: opacity }}
 								fill={true}

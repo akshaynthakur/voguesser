@@ -35,10 +35,8 @@ export const Guess = () => {
 			setTimeRemaining((prevTime) => {
 				if (prevTime === 0) {
 					clearInterval(timerInterval);
-					console.log("Countdown complete!");
+					setReveal(true);
 					return 0;
-					// } else if (timerRunning) {
-					// 	return prevTime - 1;
 				} else {
 					return prevTime - 1;
 				}
@@ -146,7 +144,9 @@ export const Guess = () => {
 										onClick={() => handleNextImage()}
 										className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
 									>
-										Next Image
+										{currentRound === gameSettings.numRounds
+											? "See Results"
+											: "Next Image"}
 									</button>
 								</div>
 							) : (

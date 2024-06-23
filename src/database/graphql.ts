@@ -5,12 +5,13 @@ const graphQLClient = new GraphQLClient("https://graphql.vogue.com/graphql", {
 	headers: {
 		"Content-Type": "application/json",
 		Host: "graphql.vogue.com",
-		"User-Agent":
-			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+		// "User-Agent":
+		// 	"Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0.6478.54 Mobile/15E148 Safari/604.1",
 	},
 });
 
 export async function fetchImage(collectionSlug: string) {
+	console.log(navigator.userAgent);
 	try {
 		const query =
 			gql`

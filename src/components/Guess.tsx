@@ -108,8 +108,10 @@ export const Guess = () => {
 				<p>Loading...</p>
 			) : (
 				<div>
-					<p>Score: {gameSettings.score}</p>
-					{!reveal && <p>Seconds: {timeRemaining}</p>}
+					<div className="flex justify-between">
+						<p>Score: {gameSettings.score}</p>
+						{!reveal && <p>Seconds: {timeRemaining}</p>}
+					</div>
 					<div className="flex justify-center">
 						<div
 							style={{
@@ -136,7 +138,7 @@ export const Guess = () => {
 						</div>
 						<div className="flex items-center justify-center bg-gray-100">
 							{reveal ? (
-								<div className="w-96">
+								<div>
 									<p>{brandName}</p>
 									<p>{slug?.split("-")[0]}</p>
 									<p>{slug?.split("-")[1]}</p>
@@ -149,7 +151,7 @@ export const Guess = () => {
 								</div>
 							) : (
 								<form
-									className="flex flex-col items-start bg-grey p-6 rounded shadow-lg w-96"
+									className="flex flex-col items-start bg-grey p-6 rounded shadow-lg"
 									onSubmit={handleSubmit}
 								>
 									<label>

@@ -31,6 +31,7 @@ export const GameEnd = () => {
 								}}
 							>
 								<Image
+									style={{ objectFit: "cover" }}
 									key={key}
 									fill={true}
 									priority={true}
@@ -38,7 +39,6 @@ export const GameEnd = () => {
 									placeholder="empty"
 									alt={"runway image"}
 									src={url}
-									objectFit="cover"
 								></Image>
 							</div>
 						);

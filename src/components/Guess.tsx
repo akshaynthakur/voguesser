@@ -73,14 +73,13 @@ export const Guess = () => {
 		if (inputs.seasonGuess == slug?.split("-")[0]) {
 			newPoints += 10;
 		}
-		if (inputs.yearGuess.toString() == slug?.split("-")[1]) {
-			newPoints += 30;
-		}
+		const year = parseInt(slug?.split("-")[1] || "0");
+		const offset = Math.abs(year - inputs.yearGuess) ** 2;
+		newPoints += Math.max(30 - offset, 0);
+		console.log(Math.max(30 - offset, 0));
 		gameSettings.setScore(
 			gameSettings.score + Math.round(newPoints * timeMultiplier)
 		);
-		console.log(newPoints);
-		console.log(timeMultiplier);
 		setReveal(true);
 	};
 
@@ -120,7 +119,7 @@ export const Guess = () => {
 							}}
 						>
 							<Image
-								style={{ opacity: opacity }}
+								style={{ opacity: opacity, objectFit: "cover" }}
 								fill={true}
 								priority={true}
 								onLoad={() => {
@@ -130,7 +129,6 @@ export const Guess = () => {
 								placeholder="empty"
 								alt={"runway image"}
 								src={image}
-								objectFit="cover"
 							/>
 							{/* )} */}
 						</div>

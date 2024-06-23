@@ -50,6 +50,8 @@ export function GameSettingsProvider({
 	const [score, setScore] = useState<number>(0);
 
 	const loadNewGame = useCallback(async () => {
+		setScore(0);
+
 		const shuffled = brands.sort(() => 0.5 - Math.random());
 		const brandNames = shuffled.slice(0, numRounds);
 		setPlayBrands(brandNames);

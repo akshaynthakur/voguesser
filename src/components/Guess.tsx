@@ -1,7 +1,6 @@
 "use client";
 
 import { useGameSettings } from "@/context/GameSettingsContext";
-import { truncateSync } from "fs";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,7 +14,7 @@ export const Guess = () => {
 	const gameSettings = useGameSettings();
 	if (!gameSettings) throw new Error("Game settings must be defined");
 
-	const [currentRound, setCurrentRound] = useState<number>(1);
+	const [currentRound, setCurrentRound] = useState<number>(0);
 	const [image, setImage] = useState<string>("");
 	const [opacity, setOpacity] = useState(0);
 	const [reveal, setReveal] = useState<boolean>(false);
@@ -27,7 +26,6 @@ export const Guess = () => {
 
 	const initialTime = 60;
 	const [timeRemaining, setTimeRemaining] = useState(initialTime);
-	// const [timerRunning, setTimerRunning] = useState(true);
 
 	useEffect(() => {
 		setTimeRemaining(60);
@@ -45,17 +43,10 @@ export const Guess = () => {
 		return () => clearInterval(timerInterval);
 	}, [opacity]);
 
-	const slug = useMemo(() => {
-		if (gameSettings.collectionSlugs)
-			return gameSettings.collectionSlugs[currentRound - 1];
-		else "";
-	}, [currentRound, gameSettings.collectionSlugs]);
-
-	const brandName = useMemo(() => {
-		if (gameSettings.playBrands)
-			return gameSettings.playBrands[currentRound - 1][1];
-		else "";
-	}, [currentRound, gameSettings.playBrands]);
+	const currentRoundData = useMemo(() => {
+		if (gameSettings.roundData) return gameSettings.roundData[currentRound];
+		else return null;
+	}, [gameSettings.roundData, currentRound]);
 
 	const handleChange = (event: any) => {
 		const name = event.target.name;
@@ -64,19 +55,30 @@ export const Guess = () => {
 	};
 
 	const handleSubmit = (event: any) => {
-		const timeMultiplier = Math.min(timeRemaining + 5, 60) / 60;
 		event.preventDefault();
+		console.log(currentRoundData);
+
+		if (!currentRoundData) throw new Error("Round data must be defined.");
+		const name = currentRoundData.brand_name;
+		const season = currentRoundData.season;
+		const year = parseInt(
+			currentRoundData.collection_slug.split("-")[1] || "0"
+		);
+
+		const timeMultiplier = Math.min(timeRemaining + 5, 60) / 60;
+
 		let newPoints = 0;
-		if (inputs.brandGuess == brandName) {
+		if (inputs.brandGuess == name) {
 			newPoints += 60;
 		}
-		if (inputs.seasonGuess == slug?.split("-")[0]) {
+		// FIXME: need to add checks in case season is not in 1st position of slug, eg. "berlin-spring..."
+		// FIXME: need to add correspondence between guess of "pre-fall" and potential value of "pre"
+		if (inputs.seasonGuess == season) {
 			newPoints += 10;
 		}
-		const year = parseInt(slug?.split("-")[1] || "0");
+		// FIXME: need to add checks in case year is not in 2nd position of slug, eg. "pre-fall-2020..."
 		const offset = Math.abs(year - inputs.yearGuess) ** 2;
 		newPoints += Math.max(30 - offset, 0);
-		console.log(Math.max(30 - offset, 0));
 		gameSettings.setScore(
 			gameSettings.score + Math.round(newPoints * timeMultiplier)
 		);
@@ -86,8 +88,8 @@ export const Guess = () => {
 	const handleNextImage = () => {
 		setOpacity(0);
 		setReveal(false);
-		if (gameSettings.collectionImages) {
-			if (currentRound == gameSettings.numRounds) {
+		if (gameSettings.roundData) {
+			if (currentRound + 1 == gameSettings.roundData.length) {
 				gameSettings.setSegment("GAME_END");
 			} else {
 				setCurrentRound(currentRound + 1);
@@ -96,8 +98,8 @@ export const Guess = () => {
 	};
 
 	useEffect(() => {
-		setImage(gameSettings.collectionImages[currentRound - 1]);
-	}, [currentRound, gameSettings.collectionImages]);
+		setImage(currentRoundData?.url || "");
+	}, [currentRoundData]);
 
 	return (
 		<section className="flex justify-center">
@@ -121,7 +123,7 @@ export const Guess = () => {
 							<Image
 								style={{ opacity: opacity, objectFit: "cover" }}
 								fill={true}
-								priority={true}
+								priority={false}
 								onLoad={() => {
 									setOpacity(1);
 								}}
@@ -135,9 +137,9 @@ export const Guess = () => {
 						<div className="w-full max-w-[80vw] min-w-[20vw] mx-auto flex justify-center space-x-4">
 							{reveal ? (
 								<div>
-									<p>{brandName}</p>
-									<p>{slug?.split("-")[0]}</p>
-									<p>{slug?.split("-")[1]}</p>
+									<p>{currentRoundData?.brand_name}</p>
+									<p>{currentRoundData?.collection_slug.split("-")[0]}</p>
+									<p>{currentRoundData?.collection_slug?.split("-")[1]}</p>
 									<button
 										onClick={() => handleNextImage()}
 										className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"

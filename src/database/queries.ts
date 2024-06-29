@@ -1,4 +1,4 @@
-import { CollectionSlugResult, ImageResult } from "@/types/graphql";
+import { CollectionSlugResult, GameRound, ImageResult } from "@/types/types";
 import { gql } from "graphql-request";
 import { graphQLClient } from "./graphql";
 import supabase from "./supabase";
@@ -82,10 +82,10 @@ export async function fetchCollectionSlug(brandSlug: string) {
 	}
 }
 
-export async function fetchRunway(numRounds: number) {
+export async function fetchRunway(numRounds: number) : Promise<GameRound[]> {
 	let { data, error } = await supabase.rpc("get_game", {
 		n: numRounds,
 	});
-	if (error) console.error(error);
+	if (error) throw new Error('Cannot fetch game data');
 	else return data;
 }

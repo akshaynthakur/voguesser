@@ -1,7 +1,7 @@
 "use client";
 
-import { brands } from "@/database/brands";
-import { fetchCollectionSlug, fetchImage } from "@/database/graphql";
+import { fetchRunway } from "@/database/queries";
+import { GameRound } from "@/types/types";
 import React, {
 	createContext,
 	useState,
@@ -16,9 +16,7 @@ import React, {
 interface GameSettingsContextProps {
 	numRounds: number;
 	difficulty: number;
-	playBrands: string[][];
-	collectionSlugs: string[];
-	collectionImages: string[];
+	roundData: GameRound[];
 	loading: boolean;
 	segment: string;
 	score: number;
@@ -41,35 +39,21 @@ export function GameSettingsProvider({
 }) {
 	const [numRounds, setNumRounds] = useState<number>(3);
 	const [difficulty, setDifficulty] = useState<number>(1);
-	const [playBrands, setPlayBrands] = useState<string[][]>([]);
-	const [collectionSlugs, setCollectionSlugs] = useState<string[]>([]);
-	const [collectionImages, setCollectionImages] = useState<string[]>([]);
+	const [roundData, setRoundData] = useState<GameRound[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-
 	const [segment, setSegment] = useState<string>("LANDING");
 	const [score, setScore] = useState<number>(0);
 
 	const loadNewGame = useCallback(async () => {
 		setScore(0);
 
-		const shuffled = brands.sort(() => 0.5 - Math.random());
-		const brandNames = shuffled.slice(0, numRounds);
-		setPlayBrands(brandNames);
-
-		const brandSlugs = brandNames.map((entry) => entry[0]);
-		await Promise.all(
-			brandSlugs.map(async (brandSlug) => await fetchCollectionSlug(brandSlug))
-		)
-			.then(async (result) => {
-				console.log(result);
-				setCollectionSlugs(result);
-				await Promise.all(
-					result.map(async (collectionSlug) => await fetchImage(collectionSlug))
-				)
-					.then((result) => setCollectionImages(result))
-					.catch((e) => console.log(e));
+		await fetchRunway(numRounds)
+			.then((res) => {
+				setRoundData(res);
 			})
-			.catch((e) => console.log(e));
+			.catch((e) => {
+				console.log(e);
+			});
 	}, [numRounds]);
 
 	useEffect(() => {
@@ -77,18 +61,16 @@ export function GameSettingsProvider({
 	}, [loadNewGame]);
 
 	useEffect(() => {
-		if (collectionImages.length !== 0) {
+		if (roundData.length !== 0) {
 			setLoading(false);
 		}
-	}, [collectionImages]);
+	}, [roundData]);
 
 	const providerValue: GameSettingsContextProps = useMemo(
 		() => ({
 			numRounds: numRounds,
 			difficulty: difficulty,
-			playBrands: playBrands,
-			collectionSlugs: collectionSlugs,
-			collectionImages: collectionImages,
+			roundData: roundData,
 			loading: loading,
 			segment: segment,
 			score: score,
@@ -97,17 +79,7 @@ export function GameSettingsProvider({
 			setScore: setScore,
 			loadNewGame: loadNewGame,
 		}),
-		[
-			numRounds,
-			difficulty,
-			playBrands,
-			collectionSlugs,
-			collectionImages,
-			loading,
-			segment,
-			score,
-			loadNewGame,
-		]
+		[numRounds, difficulty, loading, roundData, segment, score, loadNewGame]
 	);
 
 	return (

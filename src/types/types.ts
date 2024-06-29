@@ -29,3 +29,11 @@ export interface CollectionSlugResult {
 interface NestedCollectionSlugResult {
 	slug: string;
 }
+
+export interface GameRound {
+	brand_name: string;
+	brand_slug: string;
+	collection_slug: string;
+	season: string;
+	url: string;
+}

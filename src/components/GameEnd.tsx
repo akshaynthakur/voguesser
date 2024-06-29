@@ -14,12 +14,14 @@ export const GameEnd = () => {
 		gameSettings.loadNewGame();
 	};
 
+	const images = gameSettings.roundData.map((round) => round.url)
+
 	return (
 		<section>
 			<div className="flex-col justify-center space-x-4 w-full px-16">
 				<p>Final Score: {gameSettings.score}</p>
 				<div className="max-w-full mx-auto flex justify-center space-x-4">
-					{gameSettings.collectionImages.map((url, key) => {
+					{images.map((url, key) => {
 						return (
 							<div
 								key={key}

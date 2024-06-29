@@ -1,11 +1,7 @@
 "use client";
 
 // import { useWebDeviceDetection } from "@/context/WindowWidthContext";
-import { useRouter } from "next/navigation";
-import { fetchCollectionSlug, fetchImage } from "@/database/graphql";
-import { useContext, useEffect, useMemo, useState } from "react";
 import { useGameSettings } from "@/context/GameSettingsContext";
-import Image from "next/image";
 import { Landing } from "@/components/Landing";
 import { Guess } from "@/components/Guess";
 import { GameEnd } from "@/components/GameEnd";
